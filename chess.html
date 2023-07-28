@@ -1,0 +1,50 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Page Title</title>
+    <link rel="stylesheet" href="mainstyle.css">
+</head>
+<body>
+
+    <h1>This is a Heading</h1>
+    <p>This is a paragraph.</p>
+
+    <!-- Your HTML content here -->
+
+    <div id="popup" class="hidden">
+        <ul id="popupOptions"></ul>
+    </div>
+  
+  
+
+</body>
+
+
+<script src="popup.js"></script>
+<script src="chessgame.js"></script>
+<script src="grid.js"></script>
+
+
+
+</html>
+
+<!--
+  https://en.wikipedia.org/wiki/Chess_symbols_in_Unicode
+  https://www.chessprogramming.org/Main_Page
+  https://github.com/Ishaan35/Chess/blob/master/Scripts/ComputerPlayer.js
+  https://www.chessprogramming.org/Search
+
+    5-best method is almost definitely to store all possible moves for one side rather than compute it when pieces are clicked on, oh well
+    6-make it so rather than using value of board use a reference to board!!!!!!
+    
+    gotta ensure that cant do next turn without upgrading piece just yet 
+    pawn upgrading i think now
+    turns
+
+    so instead of allowing click whenever it should check whether there is a pawn waiting to be upgraded ? yes? 
+    
+    redo/improve code
+    moveing code maybe should just be saving state of the board and then going back to it.
+    bit finnicky right now tbh.
+    
+-->

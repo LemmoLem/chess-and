@@ -1,0 +1,60 @@
+﻿.grid {
+    margin: 1em auto;
+    border-collapse: collapse
+}
+
+    .grid td {
+        cursor: pointer;
+        width: 75px;
+        height: 75px;
+        border: 1px solid #ccc;
+        text-align: center;
+        font-family: sans-serif;
+        font-size: 35px;
+        color: black;
+    }
+
+        .grid td.clicked {
+            background-color: yellow;
+            font-weight: bold;
+            color: red;
+        }
+.no-select {
+    /* so this makes so cant drag or highlight */
+    -webkit-user-select: none; /* Safari */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* IE/Edge */
+    user-select: none; /* Standard */
+    -webkit-user-drag: none; /* Safari */
+    user-select: none; /* Standard */
+
+}
+.highlight {
+    background-color: rgb(177, 116, 42) !important;
+  }
+
+/* Your CSS styles here */
+
+#popup {
+    position: absolute;
+    background-color: white;
+    border: 1px solid black;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    text-align: left; /* Center the text */
+  }
+  
+  .hidden {
+    display: none;
+  }
+  
+  /* Style the options in the pop-up */
+  .option {
+    cursor: pointer;
+    font-size: 35px;
+    text-align: left; /* Center the text */
+  }
+  
+  .option:hover {
+    background-color: lightgray;
+  }
+  
