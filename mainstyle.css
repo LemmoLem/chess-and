@@ -14,11 +14,16 @@
         color: black;
     }
 
-        .grid td.clicked {
-            background-color: yellow;
-            font-weight: bold;
-            color: red;
-        }
+    .grid td.clicked {
+        background-color: yellow;
+        font-weight: bold;
+        color: blue;
+    }
+
+    .grid td.inCheck {
+      color: red;
+      font-weight: bold;
+    }
 .no-select {
     /* so this makes so cant drag or highlight */
     -webkit-user-select: none; /* Safari */

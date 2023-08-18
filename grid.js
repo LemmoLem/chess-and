@@ -43,11 +43,17 @@ var grid = clickableGrid(8,8,function(el,row,col){
             }
         }
     }
-    var moves = findLegalMoves(row,col,board);
+    var moves = isCorrectTurn(row,col,board);
+    //var moves = findLegalMoves(row,col,board);
 
+
+    //add check for whether classname is inCheck. and this will have priority over whether being clicked or not!
+    //same for below event listener where if u click outside of the grid
     if (isMoved === false){
-        if (lastClicked) lastClicked.className='';
-        el.className='clicked';
+        if (lastClicked && lastClicked.className != 'inCheck') lastClicked.className='';
+        if (el.className != 'inCheck'){
+            el.className='clicked';
+        }
         lastClicked = el;
         lastMoves = moves;
         lastSquare = [row,col];
@@ -58,8 +64,10 @@ var grid = clickableGrid(8,8,function(el,row,col){
         }
     }
     else{
-        if (lastClicked) lastClicked.className='';
-        el.className='clicked';
+        if (lastClicked && lastClicked.className != 'inCheck') lastClicked.className='';
+        if (el.className != 'inCheck'){
+            el.className='clicked';
+        }
         lastClicked = el;
         lastMoves = null;
         lastSquare = [row,col];
@@ -75,7 +83,9 @@ document.addEventListener('click', function (event) {
         for (var i = 0; i < cells.length; i++) {
             cells[i].classList.remove('highlight');
         }
-        if (lastClicked) lastClicked.className = '';
+        
+        if (lastClicked && lastClicked.className != 'inCheck') lastClicked.className = '';
+           
         lastClicked = null;
         lastMoves = null;
         lastSquare = null;

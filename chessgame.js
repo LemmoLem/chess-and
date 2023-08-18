@@ -8,7 +8,7 @@ const pieces = {
     King: 'King'
   };
 class ChessPiece {
-    constructor(isWhite,piece,unicode,position){
+    constructor(isWhite,piece,unicode,position,previousPosition){
         this.isWhite = isWhite;
         this.piece = piece;
         this.hasMoved = false;
@@ -47,7 +47,7 @@ class Player {
 const white = new Player(true);
 const black = new Player(false);
 
-
+var turnCounter = 0;
 var myBoard = new Array(8);
 for (var i = 0; i < myBoard.length; i++) {
   myBoard[i] = new Array(8).fill(null);
@@ -116,11 +116,8 @@ function findPseudoMoves(row,col,board){
         
                 // Check if the last move was a double forward and that the pawn is in same row, then if move goes into same column
                 if (Math.abs(toRow - fromRow) === 2 && Math.abs(toCol - newCol) === 0 && Math.abs(toRow - row) === 0) {
-                  console.log(lastMovedPiece.isWhite !== piece.isWhite,lastMovedPiece.piece === pieces.Pawn)
-
                   if (lastMovedPiece.piece === pieces.Pawn && lastMovedPiece.isWhite !== piece.isWhite) {
                     // En passant is possible, add the en passant capturing move
-                    console.log("It works?")
                     legalMoves.push([newRow, newCol, [toRow, toCol]]);
                   }
                 }
@@ -315,20 +312,36 @@ function findPseudoMoves(row,col,board){
     }
 }
 
+function isCorrectTurn(row,col,board){
+  var moves = [];
+  var piece = board[row][col];
+  if (piece != null){
+    if (turnCounter % 2 === 0){
+      if (piece.isWhite === true){
+        moves = findLegalMoves(row,col,board);
+      }
+    }
+    else{
+      if (piece.isWhite === false){
+        moves = findLegalMoves(row,col,board);
+      }
+    }
+  }
+  return moves;
+}
 
 function findLegalMoves(row,col,board){
   //this should use check for check 
   //for moves in legal moves should now check each one of them for whether in check or not and removes the ones that arent
+
+
   let pseudoMoves = findPseudoMoves(row,col,board);
-  console.log(pseudoMoves);
   let legalMoves = [];
   if (pseudoMoves != null)
   {
     for (let i = 0; i< pseudoMoves.length; i++){
       if (pseudoMoves[i].length === 4){
         // this means that the move is en passant
-        console.log("castling check")
-        console.log(pseudoMoves[i])
         // in third array is position of castle
         // in fourth array is position for castle to move into and subsequently postion that also needs to be checked for castling
         
@@ -400,7 +413,6 @@ function findLegalMoves(row,col,board){
         var enPassPiece;
         if (pseudoMoves[i].length === 3){
           // this means that the move is en passant
-          console.log("en passant check")
           enPassPiece = board[pseudoMoves[i][2][0]][pseudoMoves[i][2][1]]
           board[pseudoMoves[i][2][0]][pseudoMoves[i][2][1]] = null
         }
@@ -414,7 +426,6 @@ function findLegalMoves(row,col,board){
           board[pseudoMoves[i][2][0]][pseudoMoves[i][2][1]] = enPassPiece
         }
         board[pseudoMoves[i][0]][pseudoMoves[i][1]] = pieceToTake;
-        console.log(pieceToTake)
         board[row][col] = pieceToMove;
         pieceToMove.position[0] = row;
         pieceToMove.position[1] = col;
@@ -453,17 +464,19 @@ var lastMove = []
 
 function movePiece(row,col,newRow,newCol,board,enPassSquare, castlePos, castleMovePos){
   let piece = board[row][col]; // Get the piece at the selected square
+  piece.previousPosition = [row,col];
   let oldPiece = board[newRow][newCol];
   board[newRow][newCol] = piece;
   board[row][col] = null;
+
+  //increase turncounter
+  turnCounter++;
 
   var cells = document.getElementsByTagName('td');
 
   if (enPassSquare != null){
     oldPiece = board[enPassSquare[0]][enPassSquare[1]]
     board[enPassSquare[0]][enPassSquare[1]] = null;
-    console.log(oldPiece)
-    console.log("En passantyyy")
     cells[(enPassSquare[0]*8)+enPassSquare[1]].innerHTML = "";
   }
 
@@ -472,7 +485,6 @@ function movePiece(row,col,newRow,newCol,board,enPassSquare, castlePos, castleMo
     let castle = board[castlePos[0]][castlePos[1]];
     board[castlePos[0]][castlePos[1]] = null;
     castle.position = castleMovePos;
-    console.log(castle.position)
     castle.hasMoved = true;
     cells[(castlePos[0]*8)+castlePos[1]].innerHTML = "";
     cells[(castleMovePos[0]*8)+castleMovePos[1]].innerHTML = castle.unicode;
@@ -483,26 +495,18 @@ function movePiece(row,col,newRow,newCol,board,enPassSquare, castlePos, castleMo
     let index = white.pieces.indexOf(oldPiece);
     if (index > -1) { // only splice array when item is found
       white.pieces.splice(index, 1); // 2nd parameter means remove one item only
-      console.log("removed white piece")
-
     }
     index = black.pieces.indexOf(oldPiece);
     if (index > -1) { // only splice array when item is found
       black.pieces.splice(index, 1); // 2nd parameter means remove one item only
-      console.log("removed black piece")
-
     }
-    console.log(black.pieces)
-    console.log(white.pieces)
-
   }
   cells[(newRow * 8) + newCol].innerHTML = piece.unicode;
   cells[(row*8)+col].innerHTML = "";
   piece.hasMoved = true;
   piece.position = [newRow,newCol];
   lastMove = [row, col, newRow, newCol, piece]
-  console.log(lastMove)
-  console.log(board)
+
 
   // IF PAWN HAS GOTTEN TO THE END OF THE BOARD THEN CALL POPUP BOX 
   // Example usage:
@@ -526,7 +530,6 @@ function movePiece(row,col,newRow,newCol,board,enPassSquare, castlePos, castleMo
     // Usage example:
     showPopup(unicodes, 100, 200)
     .then((choice) => {
-      console.log(`User chose: ${choice}`);
       //first remove the piece from board and player pieces. then create and add the new piece
       //then add it to the board and cells yeyeye
 
@@ -534,48 +537,42 @@ function movePiece(row,col,newRow,newCol,board,enPassSquare, castlePos, castleMo
       let index = white.pieces.indexOf(piece);
       if (index > -1) { // only splice array when item is found
         white.pieces.splice(index, 1); // 2nd parameter means remove one item only
-        console.log("removed white piece")
       }
       index = black.pieces.indexOf(piece);
       if (index > -1) { // only splice array when item is found
         black.pieces.splice(index, 1); // 2nd parameter means remove one item only
-        console.log("removed black piece")
       }
 
       cells[(newRow * 8) + newCol].innerHTML = choice;
       //create the piece, add it to correct pieces and to the board
       //based on the position of choice in the array will reveal which piece it is
-      var newPiece
-      console.log("before switch")
+      var newPiece;
+      console.log("just before piece switch case");
       switch(choice){
         ////queen castle bishop horse  [13,14,15,16]
         case unicodes[0]:
           //its a queen
-          console.log("queen")
           newPiece = new ChessPiece(pieceIsWhite,pieces.Queen,13)
           break
         case unicodes[1]:
           //its a castle
-          console.log("castle")
           newPiece = new ChessPiece(pieceIsWhite,pieces.Castle,14)
           break
         case unicodes[2]:
           //its a bishop
-          console.log("bishop")
           newPiece = new ChessPiece(pieceIsWhite,pieces.Bishop,15)
           break
         case unicodes[3]:
           //its a horse
-          console.log("horses")
           newPiece = new ChessPiece(pieceIsWhite,pieces.Horse,16)
           break
       }
-      console.log("after switch")
       colourOfUpgrade.pieces.push(newPiece)
-      console.log(newPiece)
       board[newRow][newCol] = newPiece;
       newPiece.hasMoved = true;
       newPiece.position = [newRow,newCol];
+      changeKingsBasedOnCheck();
+      checkForStalemateAndCheckmate();
 
       // You can use the selected choice here
     })
@@ -587,6 +584,105 @@ function movePiece(row,col,newRow,newCol,board,enPassSquare, castlePos, castleMo
     //so now have to wait for the click and then change the piece and save it to the board and what not
 
   }
+
+  changeKingsBasedOnCheck();
+  checkForStalemateAndCheckmate();
+
+}
+
+function checkForStalemateAndCheckmate(){
+  //check whether the king is in check or not
+  //check for any legal moves
+  //if theres any legal moves game isnt over, else wise game is either check mate or stalemate
+  var moves = [];
+  var checkmate = null;
+  var stalemate = false;
+  if (turnCounter % 2 === 0){
+    for (var i = 0; i < white.pieces.length; i++){
+      moves = moves.concat(findLegalMoves(white.pieces[i].position[0],white.pieces[i].position[1],board))
+    }
+
+    if (moves.length === 0){
+      if (checkForCheck(true,black,white, board) === true){
+        checkmate = true;
+      }
+      else{
+        stalemate = true;
+      }
+    }
+  }
+  else{
+    for (var i = 0; i < black.pieces.length; i++){
+      moves = moves.concat(findLegalMoves(black.pieces[i].position[0],black.pieces[i].position[1],board))
+    }
+    if (moves.length === 0){
+      if (checkForCheck(false,black,white, board) === true){
+        checkmate = false;
+
+      }
+      else{
+        stalemate = true;
+      }
+    }
+  }
+  
+
+  var div = document.getElementById('endGameState');
+  if(stalemate){
+    div.innerHTML += 'STALEMATE!';
+  }
+  if(checkmate != null){
+    if(checkmate){
+      //white got checkmated
+      div.innerHTML += 'BLACK WON!';
+    }
+    else{
+      div.innerHTML += 'WHITE WON!';
+    }
+  }
+}
+
+function changeKingsBasedOnCheck(){
+  var cells = document.getElementsByTagName('td');
+
+  if (checkForCheck(true,black,white, board) === true){
+    var row = white.king.position[0];
+    var col = white.king.position[1];
+    cell = cells[row*8+col];
+    cell.className='inCheck';
+  }
+  else{
+    var row = white.king.position[0];
+    var col = white.king.position[1];
+    cell = cells[row*8+col];
+    cell.className='';
+
+    if (white.king.hasMoved === true){
+      row = white.king.previousPosition[0];
+      col = white.king.previousPosition[1];
+      cell = cells[row*8+col];
+      cell.className='';
+      }
+    }
+  if(checkForCheck(false,black,white, board) === true){
+    var row = black.king.position[0];
+    var col = black.king.position[1];
+    cell = cells[row*8+col];
+    cell.className='inCheck';
+  }
+  else{
+    var row = black.king.position[0];
+    var col = black.king.position[1];
+    cell = cells[row*8+col];
+    cell.className='';
+
+    if (black.king.hasMoved === true){
+      row = black.king.previousPosition[0];
+      col = black.king.previousPosition[1];
+      cell = cells[row*8+col];
+      cell.className='';
+      }
+    }  
 }
 
 // JavaScript source code
